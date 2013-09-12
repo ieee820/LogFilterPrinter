@@ -2,29 +2,52 @@ package lab.sodino.logfilter;
 
 
 public class LogFilterPrinter {
-	private static String pathInput = "D:\\Test\\20130630\\pkg.txt";
+	private static String pathInput = "E:\\Test\\20130910\\all.txt";
 	public static void main(String[]args){
 		LogParser parser = new LogParser();
 		parser.setInputPath(pathInput);
-		// ÉèÖÃÊä³öµÄTabÏî:±íÍ·Ïî
-		parser.addTabItem("hardware_os");
+		// è®¾ç½®è¾“å‡ºçš„Tabé¡¹:è¡¨å¤´é¡¹
+//		parser.addTabItem("hardware_os");
 		parser.addTabItem("qua");
 		parser.addTabItem("upload_apn");
+		parser.addTabItem("event_code");
 		parser.addTabItem("event_value");
 		parser.addTabItem("event_time");
 		
-		// ÉèÖÃĞèÒªÖ´ĞĞURLDecodeµÄTabÏî
+		// è®¾ç½®éœ€è¦æ‰§è¡ŒURLDecodeçš„Tabé¡¹
 		parser.decodeTabItem("hardware_os");
 		parser.decodeTabItem("event_value");
 		
-		// ÉèÖÃevent_valueÖĞĞèÒªÊä³öµÄÏî
+		// è®¾ç½®event_valueä¸­éœ€è¦è¾“å‡ºçš„é¡¹
+		parser.addEventParam("param_NetworkInfo");
 		parser.addEventParam("param_NetworkType");
-		parser.addEventParam("param_IMEI");
-		parser.addEventParam("param_encrypt_keys:1002");
+		parser.addEventParam("param_respcode");
+		parser.addEventParam("param_try_count");
+		parser.addEventParam("param_ipUrl");
+		parser.addEventParam("param_step");
 		parser.addEventParam("param_epId");
-		parser.addEventParam("param_FailCode");
-		parser.addEventParam("param_isConnected");
+		parser.addEventParam("param_eId");
+		parser.addEventParam("param_key_seq");
+		parser.addEventParam("param_encrypt_keys");
+		parser.addEventParam("param_resp_content_type");
+//		parser.addEventParam("param_isConnected");
 		parser.addEventParam("param_error");
-		parser.print();
+		Params lastParams = null;
+		for(int i = 0;i < arrFailCode.length;i ++){
+			if(lastParams != null){
+				parser.removeEventParam(lastParams);
+			}
+			
+			System.out.println("Print FailCode:" + arrFailCode[i].failCode +" detail:"+ arrFailCode[i].detail);
+			lastParams = parser.addEventParam("param_FailCode:" + arrFailCode[i].failCode);
+			parser.print();
+			System.out.println("---------------------------------end----------------------------\n\n");
+		}
 	}
+	
+	
+	public static FailCodeUnit []arrFailCode = new FailCodeUnit[]{
+		new FailCodeUnit(11000,"è¿‡æ»¤ç 1"),
+		new FailCodeUnit(11001,"è¿‡æ»¤ç 2"),
+};
 }

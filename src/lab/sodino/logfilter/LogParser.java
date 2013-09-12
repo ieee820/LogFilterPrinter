@@ -4,9 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.DateFormat;
@@ -38,12 +38,19 @@ public class LogParser {
 		}
 	}
 
-	public void addEventParam(String paramContent) {
+	public Params addEventParam(String paramContent) {
 		if(paramContent == null || paramContent.length() == 0){
-			return;
+			return null;
 		}
 		Params param = Params.createParams(paramContent);
 		arrParams.add(param);
+		return param;
+	}
+
+	public void removeEventParam(Params params) {
+		if(arrParams != null){
+			arrParams.remove(params);
+		}
 	}
 
 	public void setInputPath(String input) {
@@ -56,6 +63,14 @@ public class LogParser {
         DateFormat dateFormat = new SimpleDateFormat("hh_mm_ss");
         String subfix = "_"+dateFormat.format(date) + ".txt";
 		fileOutput = new File(fileInput.getParentFile().getAbsolutePath()+File.separator+(fileInput.getName().replace(".txt", subfix)));
+		if(fileOutput.exists()){
+			fileOutput.delete();
+		}
+		try {
+			fileOutput.createNewFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void print() {
@@ -73,21 +88,21 @@ public class LogParser {
 		}
 		
 		BufferedReader reader = null;
-		FileOutputStream fos = null;
+//		FileOutputStream fos = null;
+		RandomAccessFile raFos = null;
 		try {
 			reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
 			
-			if(fileOutput.exists()){
-				fileOutput.delete();
-			}
-			fileOutput.createNewFile();
-			fos = new FileOutputStream(fileOutput);
-			//µ⁄“ªæ‰Œ™±ÍÃ‚Õ∑ 
-			String tabHeader = "";
+//			fos = new FileOutputStream(fileOutput);
+			raFos = new RandomAccessFile(fileOutput, "rw");
+			raFos.seek(fileOutput.length());
+			//Á¨¨‰∏ÄÂè•‰∏∫Ê†áÈ¢òÂ§¥ 
+			String tabHeader = "\n";
 			for(int i = 0;i < arrTabs.size();i ++){
 				tabHeader += arrTabs.get(i).name+SEPERATOR; 
 			}
-			fos.write((tabHeader+"\n").getBytes());
+//			fos.write((tabHeader+"\n").getBytes());
+			raFos.write((tabHeader+"\n").getBytes());
 			String headerLine = reader.readLine();
 			String[] arr = headerLine.split(SEPERATOR);
 			if(arr == null || arr.length == 0){
@@ -109,10 +124,6 @@ public class LogParser {
 				for(int i =0;i < arr.length;i ++){
 					Tab tab = findTabByIndex(i);
 					if(tab != null){
-						if(tab.name.equals("event_value")){
-							int kk = 0;
-							kk ++;
-						}
 						String content = arr[i];
 						if(EVENT_VALUE.equals(tab.name)){
 							content = filterEventValue(content);
@@ -134,7 +145,8 @@ public class LogParser {
 				if(handleLine.length() > 0 ){
 					handleLine += "\n";
 					System.out.print(handleLine);
-					fos.write(handleLine.getBytes());
+//					fos.write(handleLine.getBytes());
+					raFos.write(handleLine.getBytes());
 				}
 			}
 		} catch (FileNotFoundException e) {
@@ -146,8 +158,11 @@ public class LogParser {
 				if(reader != null){
 					reader.close();
 				}
-				if(fos != null){
-					fos.close();
+//				if(fos != null){
+//					fos.close();
+//				}
+				if(raFos != null){
+					raFos.close();
 				}
 			}catch(Exception e){
 				e.printStackTrace();
@@ -177,7 +192,7 @@ public class LogParser {
 			String end = SIGN_AND;
 			int idxEnd = content.indexOf(end,idxStart + start.length());
 			if(idxEnd == -1){
-//				end = SEPERATOR;“—æ≠ «◊Ó∫Û“ª∏ˆ¡À£¨÷±Ω”Ω´∫Û√Êµƒ◊÷∑˚¥Æ»´≤ø∏≥÷µŒ™value
+//				end = SEPERATOR;Â∑≤ÁªèÊòØÊúÄÂêé‰∏Ä‰∏™‰∫ÜÔºåÁõ¥Êé•Â∞ÜÂêéÈù¢ÁöÑÂ≠óÁ¨¶‰∏≤ÂÖ®ÈÉ®ËµãÂÄº‰∏∫value
 				idxEnd = content.length();
 			}
 			if(idxStart >= 0 && idxEnd > idxStart){
