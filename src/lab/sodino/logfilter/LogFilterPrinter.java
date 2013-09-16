@@ -38,9 +38,10 @@ public class LogFilterPrinter {
 				parser.removeEventParam(lastParams);
 			}
 			
-			System.out.println("Print FailCode:" + arrFailCode[i].failCode +" detail:"+ arrFailCode[i].detail);
+			String hint = "Print FailCode:" + arrFailCode[i].failCode +" detail:"+ arrFailCode[i].detail;
+			System.out.println(hint);
 			lastParams = parser.addEventParam("param_FailCode:" + arrFailCode[i].failCode);
-			parser.print();
+			parser.print(hint);
 			System.out.println("---------------------------------end----------------------------\n\n");
 		}
 	}

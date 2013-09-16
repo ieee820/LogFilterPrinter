@@ -73,16 +73,15 @@ public class LogParser {
 		}
 	}
 
-	public void print() {
+	public void print(String hint) {
 		if(fileInput == null){
 			System.err.println("FileInput is null.");
 		}
-		System.out.println("Parse File:"+fileInput.getAbsolutePath());
 		
-		parser(fileInput);
+		parser(fileInput,hint);
 	}
 
-	private void parser(File file) {
+	private void parser(File file,String hint) {
 		if(file == null){
 			return;
 		}
@@ -96,6 +95,9 @@ public class LogParser {
 //			fos = new FileOutputStream(fileOutput);
 			raFos = new RandomAccessFile(fileOutput, "rw");
 			raFos.seek(fileOutput.length());
+			if(hint != null){
+				raFos.write(hint.getBytes());
+			}
 			//第一句为标题头 
 			String tabHeader = "\n";
 			for(int i = 0;i < arrTabs.size();i ++){
